@@ -50,6 +50,23 @@ impl From<f64> for Token {
     }
 }
 
+
+fn tokenize_ident(data: &str) -> Result<(Token, usize)> {
+    // Cannot start identifiers with a number
+    match data.chars.next() {
+        Some(ch) if ch.isdigit(10) => return Err(format!("Identifiers can't start with a number")),
+        None => return Err(ErrorKind::UnexpectedEOF),
+        _ => {},
+    }
+
+    let (got, bytes_read) = take_while(data, |ch| ch == '_' | ch.is_alphanumeric())?;
+
+    // match keywords here
+    
+    let tok = Token(got.to_string());
+    Ok((tok, bytes_read))
+}
+
 enum QueryType {
     CREATE,
     SELECT,

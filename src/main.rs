@@ -27,8 +27,11 @@ impl FromStr for QueryType {
     }
 }
 
+
+struct Condition {}
+
 struct Query {
-    type: QueryType,
+    query_type: QueryType,
     table_name: String,
     conditions: Vec<Condition>
 }

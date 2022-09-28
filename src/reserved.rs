@@ -157,7 +157,3 @@ const RESERVED = vec![
     "WITH",
     "WITHOUT",
 ];
-
-fn main() {
-    println!("Hello, world!");
-}

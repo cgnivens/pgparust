@@ -401,7 +401,7 @@ fn tokenize_basic_select() {
 #[cfg(test)]
 #[test]
 fn broken_snippet() {
-    let src = "SELECT \"broken";
+    let src = "SELECT \"broken FROM mytable";
     let err = tokenize(src);
     assert_eq!(err.is_err(), true);
     let e = err.unwrap_err();

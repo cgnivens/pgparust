@@ -328,6 +328,18 @@ impl<'a> Tokenizer<'a> {
     }
 }
 
+
+pub fn tokenize(src: &str) -> Result<Vec<(Token, usize, usize)>, LexerError> {
+    let mut tokenizer = Tokenizer::new(src);
+    let mut tokens = Vec::new();
+
+    while let Some(tok) = tokenizer.next_token()? {
+        tokens.push(tok);
+    }
+
+    Ok(tokens)
+}
+
 enum QueryType {
     CREATE,
     SELECT,

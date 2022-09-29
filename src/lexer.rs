@@ -1,6 +1,52 @@
 use std::str::{FromStr};
 use std::io;
+use std::error;
+use std::fmt;
+use std::num::{ParseIntError, ParseFloatError};
 use crate::reserved;
+
+#[derive(Debug)]
+pub enum LexerError {
+    BadNumber(&'static str),
+    IOError(&'static str),
+}
+
+impl error::Error for LexerError{}
+
+impl fmt::Display for LexerError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{}",
+            match *self {
+                Self::BadNumber(err_desc) => err_desc,
+                Self::IOError(err_desc) => err_desc,
+            }
+        )
+    }
+}
+
+impl From<ParseIntError> for LexerError {
+    fn from(_: ParseIntError) -> Self {
+        LexerError::BadNumber(
+            "Error handling conversion of integer value",
+        )
+    }
+}
+impl From<ParseFloatError> for LexerError {
+    fn from(_: std::num::ParseFloatError) -> Self {
+        LexerError::BadNumber(
+            "Error handling conversion of decimal value"
+        )
+    }
+}
+impl From<io::Error> for LexerError {
+    fn from(_: io::Error) -> Self {
+        LexerError::IOError(
+            "IO Error while parsing"
+        )
+    }
+}
 
 fn take_while<F>(data: &str, mut pred: F) -> io::Result<(&str, usize)>
 where F: FnMut(char) -> bool
@@ -95,6 +141,64 @@ fn tokenize_ident(data: &str) -> io::Result<(Token, usize)> {
     };
 
     Ok((tok, bytes_read))
+}
+
+
+fn tokenize_number(data: &str) -> Result<(Token, usize), LexerError> {
+    let mut seen_dot = false;
+
+    let (decimal, bytes_read) = take_while(data, |c| {
+        if c.is_digit(10) {
+            true
+        } else if c == '.' {
+            if !seen_dot {
+                seen_dot = true;
+                true
+            } else {
+                false
+            }
+        } else {
+            false
+        }
+    })?;
+
+    if seen_dot {
+        let n: f64 = decimal.parse()?;
+        Ok((Token::Decimal(n), bytes_read))
+    } else {
+        let n: usize = decimal.parse()?;
+        Ok((Token::Integer(n), bytes_read))
+    }
+}
+
+fn skip_whitespace(data: &str) -> usize {
+    match take_while(data, |ch| ch.is_whitespace()) {
+        Ok((_, bytes_skipped)) => bytes_skipped,
+        _ => 0,
+    }
+}
+
+fn skip_comments(data: &str) -> usize {
+    // skip both single-line and block comments
+    let pairs = [("--", "\n"), ("/*", "*/")];
+
+    for &(pattern, matcher) in &pairs {
+        if data.starts_with(pattern) {
+            let leftovers = skip_until(data, matcher);
+            return data.len() - leftovers.len();
+        }
+    }
+
+    0
+}
+
+fn skip_until<'a>(mut src: &'a str, pattern: &str) -> &'a str {
+    while !src.is_empty() && !src.starts_with(pattern) {
+        let next_char_size = src.chars().next().expect("The string isn't empty").len_utf8();
+        src = &src[next_char_size..];
+    }
+
+    &src[pattern.len()..]
 }
 
 enum QueryType {

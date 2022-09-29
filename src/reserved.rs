@@ -1,14 +1,14 @@
 use std::collections::HashSet;
 // TODO: For the love of all that is holy
 // please refactor this
-pub fn is_reserved(token: String) -> bool {
+pub fn is_reserved(token: &str) -> bool {
     let reserved = populate_hashset();
-    reserved.contains(&token.to_uppercase())
+    reserved.contains(&token.clone().to_string().to_uppercase())
 }
 
-pub fn is_function(token: String) -> bool {
+pub fn is_function(token: &str) -> bool {
     let reserved = functions();
-    reserved.contains(&token.to_uppercase())
+    reserved.contains(&token.clone().to_string().to_uppercase())
 }
 
 fn populate_hashset() -> HashSet<String> {

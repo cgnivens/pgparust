@@ -7,8 +7,10 @@ use crate::reserved;
 
 #[derive(Debug)]
 pub enum LexerError {
-    BadNumber(&'static str),
-    IOError(&'static str),
+    BadNumber(String),
+    IOError(String),
+    UnknownCharacter(String),
+    EOFError(String),
 }
 
 impl error::Error for LexerError{}
@@ -18,7 +20,9 @@ impl fmt::Display for LexerError {
         write!(
             f,
             "{}",
-            match *self {
+            match &*self {
+                Self::UnknownCharacter(err_desc) => err_desc,
+                Self::EOFError(err_desc) => err_desc,
                 Self::BadNumber(err_desc) => err_desc,
                 Self::IOError(err_desc) => err_desc,
             }
@@ -29,21 +33,21 @@ impl fmt::Display for LexerError {
 impl From<ParseIntError> for LexerError {
     fn from(_: ParseIntError) -> Self {
         LexerError::BadNumber(
-            "Error handling conversion of integer value",
+            "Error handling conversion of integer value".to_string(),
         )
     }
 }
 impl From<ParseFloatError> for LexerError {
     fn from(_: std::num::ParseFloatError) -> Self {
         LexerError::BadNumber(
-            "Error handling conversion of decimal value"
+            "Error handling conversion of decimal value".to_string()
         )
     }
 }
 impl From<io::Error> for LexerError {
     fn from(_: io::Error) -> Self {
         LexerError::IOError(
-            "IO Error while parsing"
+            "IO Error while parsing".to_string()
         )
     }
 }

@@ -104,13 +104,26 @@ pub enum Token {
 
 impl From<String> for Token {
     fn from(other: String) -> Token {
-        Token::Identifier(other)
+        if reserved::is_function(&other){
+            Token::Function(other)
+        } else if reserved::is_reserved(&other) {
+            Token::Reserved(other)
+        } else {
+            Token::Identifier(other)
+        }
     }
 }
 
-impl<'a> From<&'a str> for Token {
-    fn from(other: &'a str) -> Token {
-        Token::Identifier(other.to_string())
+impl std::str::FromStr for Token {
+    type Err = io::Error;
+    fn from_str(other: &str) -> io::Result<Token> {
+        if reserved::is_function(other){
+            Ok(Token::Function(other.to_string()))
+        } else if reserved::is_reserved(other) {
+            Ok(Token::Reserved(other.to_string()))
+        } else {
+            Ok(Token::Identifier(other.to_string()))
+        }
     }
 }
 
@@ -138,15 +151,16 @@ fn tokenize_ident(data: &str) -> io::Result<(Token, usize)> {
     let (got, bytes_read) = take_while(data, |ch| (ch == '_') || (ch.is_alphanumeric()))?;
 
     // match keywords here
-    let tok = {
-        if reserved::is_reserved(got.to_string()) {
-            Token::Reserved(got.to_string())
-        } else if reserved::is_function(got.to_string()){
-            Token::Function(got.to_string())
-        } else {
-            Token::Identifier(got.to_string())
-        }
-    };
+    let tok = Token::from_str(got)?;
+    // {
+    //     if reserved::is_reserved(got.to_string()) {
+    //         Token::Reserved(got.to_string())
+    //     } else if reserved::is_function(got.to_string()){
+    //         Token::Function(got.to_string())
+    //     } else {
+    //         Token::Identifier(got.to_string())
+    //     }
+    // };
 
     Ok((tok, bytes_read))
 }

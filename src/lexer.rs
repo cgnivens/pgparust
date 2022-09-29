@@ -3,6 +3,7 @@ use std::io;
 use std::error;
 use std::fmt;
 use std::num::{ParseIntError, ParseFloatError};
+use serde::{Serialize, Deserialize};
 use crate::reserved;
 
 #[derive(Debug)]
@@ -76,6 +77,7 @@ where F: FnMut(char) -> bool
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Token {
     Integer(usize),
     Decimal(f64),

@@ -1,159 +1,175 @@
-const RESERVED = vec![
-    "AES128",
-    "AES256",
-    "ALL",
-    "ALLOWOVERWRITE",
-    "ANALYSE",
-    "ANALYZE",
-    "AND",
-    "ANY",
-    "ARRAY",
-    "AS",
-    "ASC",
-    "AUTHORIZATION",
-    "AZ64",
-    "BACKUP",
-    "BETWEEN",
-    "BINARY",
-    "BLANKSASNULL",
-    "BOTH",
-    "BYTEDICT",
-    "BZIP2",
-    "CASE",
-    "CAST",
-    "CHECK",
-    "COLLATE",
-    "COLUMN",
-    "CONSTRAINT",
-    "CREATE",
-    "CREDENTIALS",
-    "CROSS",
-    "CURRENT_DATE",
-    "CURRENT_TIME",
-    "CURRENT_TIMESTAMP",
-    "CURRENT_USER",
-    "CURRENT_USER_ID",
-    "DEFAULT",
-    "DEFERRABLE",
-    "DEFLATE",
-    "DEFRAG",
-    "DELTA",
-    "DELTA32K",
-    "DESC",
-    "DISABLE",
-    "DISTINCT",
-    "DO",
-    "ELSE",
-    "EMPTYASNULL",
-    "ENABLE",
-    "ENCODE",
-    "ENCRYPT     ",
-    "ENCRYPTION",
-    "END",
-    "EXCEPT",
-    "EXPLICIT",
-    "FALSE",
-    "FOR",
-    "FOREIGN",
-    "FREEZE",
-    "FROM",
-    "FULL",
-    "GLOBALDICT256",
-    "GLOBALDICT64K",
-    "GRANT",
-    "GROUP",
-    "GZIP",
-    "HAVING",
-    "IDENTITY",
-    "IGNORE",
-    "ILIKE",
-    "IN",
-    "INITIALLY",
-    "INNER",
-    "INTERSECT",
-    "INTERVAL",
-    "INTO",
-    "IS",
-    "ISNULL",
-    "JOIN",
-    "LANGUAGE",
-    "LEADING",
-    "LEFT",
-    "LIKE",
-    "LIMIT",
-    "LOCALTIME",
-    "LOCALTIMESTAMP",
-    "LUN",
-    "LUNS",
-    "LZO",
-    "LZOP",
-    "MINUS",
-    "MOSTLY16",
-    "MOSTLY32",
-    "MOSTLY8",
-    "NATURAL",
-    "NEW",
-    "NOT",
-    "NOTNULL",
-    "NULL",
-    "NULLS",
-    "OFF",
-    "OFFLINE",
-    "OFFSET",
-    "OID",
-    "OLD",
-    "ON",
-    "ONLY",
-    "OPEN",
-    "OR",
-    "ORDER",
-    "OUTER",
-    "OVERLAPS",
-    "PARALLEL",
-    "PARTITION",
-    "PERCENT",
-    "PERMISSIONS",
-    "PIVOT",
-    "PLACING",
-    "PRIMARY",
-    "RAW",
-    "READRATIO",
-    "RECOVER",
-    "REFERENCES",
-    "REJECTLOG",
-    "RESORT",
-    "RESPECT",
-    "RESTORE",
-    "RIGHT",
-    "SELECT",
-    "SESSION_USER",
-    "SIMILAR",
-    "SNAPSHOT ",
-    "SOME",
-    "SYSDATE",
-    "SYSTEM",
-    "TABLE",
-    "TAG",
-    "TDES",
-    "TEXT255",
-    "TEXT32K",
-    "THEN",
-    "TIMESTAMP",
-    "TO",
-    "TOP",
-    "TRAILING",
-    "TRUE",
-    "TRUNCATECOLUMNS",
-    "UNION",
-    "UNIQUE",
-    "UNNEST",
-    "UNPIVOT",
-    "USER",
-    "USING",
-    "VERBOSE",
-    "WALLET",
-    "WHEN",
-    "WHERE",
-    "WITH",
-    "WITHOUT",
-];
+use std::collections::HashSet;
+
+pub enum TokenType {
+    Reserved: String,
+    Other: String
+}
+
+impl FromStr for TokenType {
+    fn from(other: String) -> TokenType {
+        match RESERVED.contains(other) {
+            Some(w) => TokenType::Reserved(w),
+            _ => TokenType::Other(w)
+        }
+    }
+}
+
+
+const RESERVED = HashSet::new();
+RESERVED.insert("AES128");
+RESERVED.insert("AES256");
+RESERVED.insert("ALL");
+RESERVED.insert("ALLOWOVERWRITE");
+RESERVED.insert("ANALYSE");
+RESERVED.insert("ANALYZE");
+RESERVED.insert("AND");
+RESERVED.insert("ANY");
+RESERVED.insert("ARRAY");
+RESERVED.insert("AS");
+RESERVED.insert("ASC");
+RESERVED.insert("AUTHORIZATION");
+RESERVED.insert("AZ64");
+RESERVED.insert("BACKUP");
+RESERVED.insert("BETWEEN");
+RESERVED.insert("BINARY");
+RESERVED.insert("BLANKSASNULL");
+RESERVED.insert("BOTH");
+RESERVED.insert("BYTEDICT");
+RESERVED.insert("BZIP2");
+RESERVED.insert("CASE");
+RESERVED.insert("CAST");
+RESERVED.insert("CHECK");
+RESERVED.insert("COLLATE");
+RESERVED.insert("COLUMN");
+RESERVED.insert("CONSTRAINT");
+RESERVED.insert("CREATE");
+RESERVED.insert("CREDENTIALS");
+RESERVED.insert("CROSS");
+RESERVED.insert("CURRENT_DATE");
+RESERVED.insert("CURRENT_TIME");
+RESERVED.insert("CURRENT_TIMESTAMP");
+RESERVED.insert("CURRENT_USER");
+RESERVED.insert("CURRENT_USER_ID");
+RESERVED.insert("DEFAULT");
+RESERVED.insert("DEFERRABLE");
+RESERVED.insert("DEFLATE");
+RESERVED.insert("DEFRAG");
+RESERVED.insert("DELTA");
+RESERVED.insert("DELTA32K");
+RESERVED.insert("DESC");
+RESERVED.insert("DISABLE");
+RESERVED.insert("DISTINCT");
+RESERVED.insert("DO");
+RESERVED.insert("ELSE");
+RESERVED.insert("EMPTYASNULL");
+RESERVED.insert("ENABLE");
+RESERVED.insert("ENCODE");
+RESERVED.insert("ENCRYPT");
+RESERVED.insert("ENCRYPTION");
+RESERVED.insert("END");
+RESERVED.insert("EXCEPT");
+RESERVED.insert("EXPLICIT");
+RESERVED.insert("FALSE");
+RESERVED.insert("FOR");
+RESERVED.insert("FOREIGN");
+RESERVED.insert("FREEZE");
+RESERVED.insert("FROM");
+RESERVED.insert("FULL");
+RESERVED.insert("GLOBALDICT256");
+RESERVED.insert("GLOBALDICT64K");
+RESERVED.insert("GRANT");
+RESERVED.insert("GROUP");
+RESERVED.insert("GZIP");
+RESERVED.insert("HAVING");
+RESERVED.insert("IDENTITY");
+RESERVED.insert("IGNORE");
+RESERVED.insert("ILIKE");
+RESERVED.insert("IN");
+RESERVED.insert("INITIALLY");
+RESERVED.insert("INNER");
+RESERVED.insert("INTERSECT");
+RESERVED.insert("INTERVAL");
+RESERVED.insert("INTO");
+RESERVED.insert("IS");
+RESERVED.insert("ISNULL");
+RESERVED.insert("JOIN");
+RESERVED.insert("LANGUAGE");
+RESERVED.insert("LEADING");
+RESERVED.insert("LEFT");
+RESERVED.insert("LIKE");
+RESERVED.insert("LIMIT");
+RESERVED.insert("LOCALTIME");
+RESERVED.insert("LOCALTIMESTAMP");
+RESERVED.insert("LUN");
+RESERVED.insert("LUNS");
+RESERVED.insert("LZO");
+RESERVED.insert("LZOP");
+RESERVED.insert("MINUS");
+RESERVED.insert("MOSTLY16");
+RESERVED.insert("MOSTLY32");
+RESERVED.insert("MOSTLY8");
+RESERVED.insert("NATURAL");
+RESERVED.insert("NEW");
+RESERVED.insert("NOT");
+RESERVED.insert("NOTNULL");
+RESERVED.insert("NULL");
+RESERVED.insert("NULLS");
+RESERVED.insert("OFF");
+RESERVED.insert("OFFLINE");
+RESERVED.insert("OFFSET");
+RESERVED.insert("OID");
+RESERVED.insert("OLD");
+RESERVED.insert("ON");
+RESERVED.insert("ONLY");
+RESERVED.insert("OPEN");
+RESERVED.insert("OR");
+RESERVED.insert("ORDER");
+RESERVED.insert("OUTER");
+RESERVED.insert("OVERLAPS");
+RESERVED.insert("PARALLEL");
+RESERVED.insert("PARTITION");
+RESERVED.insert("PERCENT");
+RESERVED.insert("PERMISSIONS");
+RESERVED.insert("PIVOT");
+RESERVED.insert("PLACING");
+RESERVED.insert("PRIMARY");
+RESERVED.insert("RAW");
+RESERVED.insert("READRATIO");
+RESERVED.insert("RECOVER");
+RESERVED.insert("REFERENCES");
+RESERVED.insert("REJECTLOG");
+RESERVED.insert("RESORT");
+RESERVED.insert("RESPECT");
+RESERVED.insert("RESTORE");
+RESERVED.insert("RIGHT");
+RESERVED.insert("SELECT");
+RESERVED.insert("SESSION_USER");
+RESERVED.insert("SIMILAR");
+RESERVED.insert("SNAPSHOT");
+RESERVED.insert("SOME");
+RESERVED.insert("SYSDATE");
+RESERVED.insert("SYSTEM");
+RESERVED.insert("TABLE");
+RESERVED.insert("TAG");
+RESERVED.insert("TDES");
+RESERVED.insert("TEXT255");
+RESERVED.insert("TEXT32K");
+RESERVED.insert("THEN");
+RESERVED.insert("TIMESTAMP");
+RESERVED.insert("TO");
+RESERVED.insert("TOP");
+RESERVED.insert("TRAILING");
+RESERVED.insert("TRUE");
+RESERVED.insert("TRUNCATECOLUMNS");
+RESERVED.insert("UNION");
+RESERVED.insert("UNIQUE");
+RESERVED.insert("UNNEST");
+RESERVED.insert("UNPIVOT");
+RESERVED.insert("USER");
+RESERVED.insert("USING");
+RESERVED.insert("VERBOSE");
+RESERVED.insert("WALLET");
+RESERVED.insert("WHEN");
+RESERVED.insert("WHERE");
+RESERVED.insert("WITH");
+RESERVED.insert("WITHOUT");

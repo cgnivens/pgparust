@@ -11,6 +11,7 @@ pub enum LexerError {
     IOError(String),
     UnknownCharacter(String),
     EOFError(String),
+    MessageWithLocation(String),
 }
 
 impl error::Error for LexerError{}
@@ -25,6 +26,7 @@ impl fmt::Display for LexerError {
                 Self::EOFError(err_desc) => err_desc,
                 Self::BadNumber(err_desc) => err_desc,
                 Self::IOError(err_desc) => err_desc,
+                Self::MessageWithLocation(err_desc) => err_desc,
             }
         )
     }
@@ -275,6 +277,55 @@ pub fn tokenize_single_token(data: &str) -> Result<(Token, usize), LexerError> {
     };
 
     Ok((tok, length))
+}
+
+struct Tokenizer<'a> {
+    current_index: usize,
+    remaining_text: &'a str,
+}
+
+impl<'a> Tokenizer<'a> {
+    fn new(src: &str) -> Tokenizer {
+        Tokenizer {
+            current_index: 0,
+            remaining_text: src,
+        }
+    }
+
+    fn next_token(&mut self) -> Result<Option<(Token, usize, usize)>, LexerError> {
+        self.skip_whitespace();
+
+        if self.remaining_text.is_empty() {
+            Ok(None)
+        } else {
+            let start = self.current_index;
+            let tok = match self._next_token() {
+                Ok(t) => t,
+                _ => return Err(LexerError::MessageWithLocation(
+                        format!("Couldn't read next token at {}", self.current_index)
+                    ))
+            };
+            let end = self.current_index;
+            Ok(Some((tok, start, end)))
+        }
+    }
+
+    fn skip_whitespace(&mut self) {
+        let skipped = skip(self.remaining_text);
+        self.chomp(skipped);
+    }
+
+    fn _next_token(&mut self) -> Result<Token, LexerError> {
+        let (tok, bytes_read) = tokenize_single_token(self.remaining_text)?;
+        self.chomp(bytes_read);
+
+        Ok(tok)
+    }
+
+    fn chomp(&mut self, num_bytes: usize) {
+        self.remaining_text = &self.remaining_text[num_bytes..];
+        self.current_index += num_bytes;
+    }
 }
 
 enum QueryType {

@@ -34,6 +34,7 @@ pub enum Token {
     Decimal(f64),
     Identifier(String),
     Reserved(String),
+    Function(String),
     QuotedString(String),
     Asterisk,
     At,
@@ -91,6 +92,8 @@ fn tokenize_ident(data: &str) -> io::Result<(Token, usize)> {
     let tok = {
         if reserved::is_reserved(got.to_string()) {
             Token::Reserved(got.to_string())
+        } else if reserved::is_function(got.to_string()){
+            Token::Function(got.to_string())
         } else {
             Token::Identifier(got.to_string())
         }

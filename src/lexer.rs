@@ -175,7 +175,7 @@ fn tokenize_number(data: &str) -> Result<(Token, usize), LexerError> {
     }
 }
 
-fn parse_quoted(data: &str) -> Result<(Token, usize), LexerError> {
+fn tokenize_quote_string(data: &str) -> Result<(Token, usize), LexerError> {
     let mut seen_esc = false;
 
     let (s, bytes_read) = take_while(data, |c| {
@@ -269,6 +269,7 @@ pub fn tokenize_single_token(data: &str) -> Result<(Token, usize), LexerError> {
         '[' => (Token::OpenSquare, 1),
         ']' => (Token::CloseSquare, 1),
         '0' ... '9' => tokenize_number(data)?,
+        '"' => tokenize_quote_string(data)?,
         c @ '_' | c if c.is_alphabetic() => tokenize_ident(data)?,
         other => return Err(LexerError::UnknownCharacter(format!("Hit unknown character {:?}", other))),
     };

@@ -1,5 +1,6 @@
 use std::str::{FromStr};
 use std::io;
+mod reserved;
 
 
 pub fn main() {
@@ -32,6 +33,7 @@ pub enum Token {
     Integer(usize),
     Decimal(f64),
     Identifier(String),
+    Reserved(String),
     QuotedString(String),
     Asterisk,
     At,
@@ -74,6 +76,11 @@ impl From<f64> for Token {
     }
 }
 
+pub enum TokenType {
+    Reserved(String),
+    Other(Token)
+}
+
 
 fn tokenize_ident(data: &str) -> io::Result<(Token, usize)> {
     // Cannot start identifiers with a number
@@ -86,8 +93,14 @@ fn tokenize_ident(data: &str) -> io::Result<(Token, usize)> {
     let (got, bytes_read) = take_while(data, |ch| (ch == '_') || (ch.is_alphanumeric()))?;
 
     // match keywords here
+    let tok = {
+        if reserved::is_reserved(got.to_string()) {
+            Token::Reserved(got.to_string())
+        } else {
+            Token::Identifier(got.to_string())
+        }
+    };
 
-    let tok = Token::Identifier(got.to_string());
     Ok((tok, bytes_read))
 }
 

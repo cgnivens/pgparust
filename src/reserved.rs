@@ -2,10 +2,15 @@ use std::collections::HashSet;
 
 pub fn is_reserved(token: String) -> bool {
     let reserved = populate_hashset();
-    reserved.contains(&token)
+    reserved.contains(&token.to_uppercase())
 }
 
-fn populate_hashset<'a>() -> HashSet<String> {
+pub fn is_function(token: String) -> bool {
+    let reserved = functions();
+    reserved.contains(&token.to_uppercase())
+}
+
+fn populate_hashset() -> HashSet<String> {
     let mut hashset = HashSet::new();
     hashset.insert("AES128".to_string());
     hashset.insert("AES256".to_string());

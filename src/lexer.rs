@@ -116,6 +116,8 @@ impl From<String> for Token {
 }
 
 impl std::str::FromStr for Token {
+    // Wrap in the checks for functions/reserved keywords
+    // here to make it easier
     type Err = io::Error;
     fn from_str(other: &str) -> io::Result<Token> {
         if reserved::is_function(other){
@@ -151,17 +153,8 @@ fn tokenize_ident(data: &str) -> io::Result<(Token, usize)> {
 
     let (got, bytes_read) = take_while(data, |ch| (ch == '_') || (ch.is_alphanumeric()))?;
 
-    // match keywords here
+    // match keywords using from_str implementation
     let tok = Token::from_str(got)?;
-    // {
-    //     if reserved::is_reserved(got.to_string()) {
-    //         Token::Reserved(got.to_string())
-    //     } else if reserved::is_function(got.to_string()){
-    //         Token::Function(got.to_string())
-    //     } else {
-    //         Token::Identifier(got.to_string())
-    //     }
-    // };
 
     Ok((tok, bytes_read))
 }

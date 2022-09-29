@@ -76,11 +76,6 @@ impl From<f64> for Token {
     }
 }
 
-pub enum TokenType {
-    Reserved(String),
-    Other(Token)
-}
-
 
 fn tokenize_ident(data: &str) -> io::Result<(Token, usize)> {
     // Cannot start identifiers with a number

@@ -1,37 +1,9 @@
 use std::collections::HashSet;
-// use std::str::FromStr;
 
 pub fn is_reserved(token: String) -> bool {
     let reserved = populate_hashset();
     reserved.contains(&token)
 }
-
-// impl FromStr for TokenType {
-//     type Err = String;
-//
-//     fn from_str(other: &str) -> Result<TokenType, String> {
-//
-//
-//         if reserved.contains(other) {
-//             Ok(TokenType::Reserved(other.to_string()))
-//         } else {
-//             Ok(TokenType::Other)
-//         }
-//     }
-// }
-//
-//
-// impl From<String> for TokenType {
-//     fn from(other: String) -> TokenType {
-//         let reserved = populate_hashset();
-//
-//         if reserved.contains(&other) {
-//             TokenType::Reserved(other)
-//         } else {
-//             TokenType::Other
-//         }
-//     }
-// }
 
 fn populate_hashset<'a>() -> HashSet<String> {
     let mut hashset = HashSet::new();

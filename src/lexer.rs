@@ -387,3 +387,18 @@ struct Query {
     table_name: String,
     conditions: Vec<Condition>
 }
+
+#[cfg(test)]
+#[test]
+fn tokenize_basic_select() {
+    let src = "SELECT * FROM mytable";
+    let should_be: Vec<(Token, usize, usize)> = vec![
+        (Token::from_str("SELECT").unwrap(), 0, 6),
+        (Token::Asterisk, 7, 8),
+        (Token::from_str("FROM").unwrap(), 9, 13),
+        (Token::from_str("mytable").unwrap(), 14, 21),
+    ];
+    let tokens = tokenize(src).unwrap();
+
+    assert_eq!(tokens, should_be);
+}

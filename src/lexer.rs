@@ -429,3 +429,20 @@ fn test_builtins() {
     let tokens = tokenize(src).unwrap();
     assert_eq!(tokens, should_be);
 }
+
+#[cfg(test)]
+#[test]
+fn test_alias() {
+    let src = "SELECT t.hello FROM mytable t";
+    let should_be: Vec<(Token, usize, usize)> = vec![
+        (Token::Reserved("SELECT".to_string()), 0, 6),
+        (Token::from_str("t").unwrap(), 7, 8),
+        (Token::Dot, 8, 9),
+        (Token::from_str("hello").unwrap(), 9, 14),
+        (Token::Reserved("FROM".to_string()), 15, 19),
+        (Token::from_str("mytable").unwrap(), 20, 27),
+        (Token::from_str("t").unwrap(), 28, 29),
+    ];
+    let tokens = tokenize(src).unwrap();
+    assert_eq!(tokens, should_be);
+}

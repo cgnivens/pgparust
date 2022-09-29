@@ -100,6 +100,7 @@ pub enum Token {
     Plus,
     Semicolon,
     Slash,
+    Comma,
 }
 
 impl From<String> for Token {
@@ -286,6 +287,7 @@ pub fn tokenize_single_token(data: &str) -> Result<(Token, usize), LexerError> {
         ')' => (Token::CloseParen, 1),
         '[' => (Token::OpenSquare, 1),
         ']' => (Token::CloseSquare, 1),
+        ',' => (Token::Comma, 1),
         '0' ... '9' => tokenize_number(data)?,
         '"' => tokenize_quote_string(data)?,
         c @ '_' | c if c.is_alphabetic() => tokenize_ident(data)?,

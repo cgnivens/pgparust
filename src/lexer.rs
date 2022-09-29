@@ -232,6 +232,50 @@ fn skip_until<'a>(mut src: &'a str, pattern: &str) -> &'a str {
     &src[pattern.len()..]
 }
 
+fn skip(src: &str) -> usize {
+    // Generic skip function wrapping the whitespace and comments
+    // logic
+    let mut remaining = src;
+
+    loop {
+        let ws = skip_whitespace(remaining);
+        remaining = &remaining[ws..];
+        let comments = skip_comments(remaining);
+        remaining = &remaining[comments..];
+
+        if ws + comments == 0 {
+            return src.len() - remaining.len();
+        }
+    }
+}
+
+pub fn tokenize_single_token(data: &str) -> Result<(Token, usize), LexerError> {
+    let next = match data.chars().next() {
+        Some(c) => c,
+        None => return Err(LexerError::EOFError("Hit end of file".to_string())),
+    };
+
+    let (tok, length) = match next {
+        '.' => (Token::Dot, 1),
+        '=' => (Token::Equals, 1),
+        '+' => (Token::Plus, 1),
+        '-' => (Token::Minus, 1),
+        '*' => (Token::Asterisk, 1),
+        '/' => (Token::Slash, 1),
+        '@' => (Token::At, 1),
+        '^' => (Token::Carat, 1),
+        '(' => (Token::OpenParen, 1),
+        ')' => (Token::CloseParen, 1),
+        '[' => (Token::OpenSquare, 1),
+        ']' => (Token::CloseSquare, 1),
+        '0' ... '9' => tokenize_number(data)?,
+        c @ '_' | c if c.is_alphabetic() => tokenize_ident(data)?,
+        other => return Err(LexerError::UnknownCharacter(format!("Hit unknown character {:?}", other))),
+    };
+
+    Ok((tok, length))
+}
+
 enum QueryType {
     CREATE,
     SELECT,

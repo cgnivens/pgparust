@@ -1,7 +1,31 @@
 use std::str::{FromStr};
+use std::io;
+
 
 pub fn main() {
     println!("hello world");
+}
+
+fn take_while<F>(data: &str, mut pred: F) -> io::Result<(&str, usize)>
+where F: FnMut(char) -> bool
+{
+    let mut current_index = 0;
+
+    for ch in data.chars() {
+        let should_continue = pred(ch);
+
+        if !should_continue {
+            break;
+        }
+
+        current_index += ch.len_utf8();
+    }
+
+    if current_index == 0 {
+        Err(io::Error::new(io::ErrorKind::Other, "No Matches"))
+    } else {
+        Ok((&data[..current_index], current_index))
+    }
 }
 
 pub enum Token {

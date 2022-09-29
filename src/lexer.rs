@@ -175,6 +175,33 @@ fn tokenize_number(data: &str) -> Result<(Token, usize), LexerError> {
     }
 }
 
+fn parse_quoted(data: &str) -> Result<(Token, usize), LexerError> {
+    let mut seen_esc = false;
+
+    let (s, bytes_read) = take_while(data, |c| {
+        if c == '\\' {
+            if !seen_esc {
+                seen_esc = true;
+                true
+            } else {
+                seen_esc = false;
+                true
+            }
+        } else if c == '"'{
+            if seen_esc {
+                seen_esc = false;
+                true
+            } else {
+                false
+            }
+        } else {
+            true
+        }
+    })?;
+
+    Ok((Token::QuotedString(s.to_string()), bytes_read))
+}
+
 fn skip_whitespace(data: &str) -> usize {
     match take_while(data, |ch| ch.is_whitespace()) {
         Ok((_, bytes_skipped)) => bytes_skipped,

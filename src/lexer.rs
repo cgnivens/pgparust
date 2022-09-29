@@ -411,3 +411,21 @@ fn broken_snippet() {
         other => panic!("Unexpected error: {}", other),
     }
 }
+
+
+#[cfg(test)]
+#[test]
+fn test_builtins() {
+    let src = "SELECT COUNT(1) FROM mytable";
+    let should_be: Vec<(Token, usize, usize)> = vec![
+        (Token::Reserved("SELECT".to_string()), 0, 6),
+        (Token::Function("COUNT".to_string()), 7, 12),
+        (Token::OpenParen, 12, 13),
+        (Token::from(1), 13, 14),
+        (Token::CloseParen, 14, 15),
+        (Token::Reserved("FROM".to_string()), 16, 20),
+        (Token::from_str("mytable").unwrap(), 21, 28)
+    ];
+    let tokens = tokenize(src).unwrap();
+    assert_eq!(tokens, should_be);
+}

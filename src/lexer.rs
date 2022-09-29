@@ -397,3 +397,17 @@ fn tokenize_basic_select() {
 
     assert_eq!(tokens, should_be);
 }
+
+#[cfg(test)]
+#[test]
+fn broken_snippet() {
+    let src = "SELECT \"broken";
+    let err = tokenize(src);
+    assert_eq!(err.is_err(), true);
+    let e = err.unwrap_err();
+
+    match e {
+        LexerError::MessageWithLocation(s) => assert_eq!(s, "Couldn't read next token at 7"),
+        other => panic!("Unexpected error: {}", other),
+    }
+}

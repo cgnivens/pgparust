@@ -30,16 +30,6 @@ pub struct CodeMap {
     files: Vec<Rc<FileMap>>,
 }
 
-// This is the map of each span
-// to its location in the file
-#[derive(Clone, Debug)]
-pub struct FileMap {
-    name: String,
-    contents: String,
-    next_id: Rc<AtomicUsize>,
-    items: RefCell<HashMap<Span, Range<usize>>>
-}
-
 
 impl CodeMap {
     pub fn new() -> CodeMap {
@@ -87,5 +77,45 @@ impl CodeMap {
 impl Default for CodeMap {
     fn default() -> CodeMap {
         CodeMap::new()
+    }
+}
+
+
+// This is the map of each span
+// to its location in the file
+#[derive(Clone, Debug)]
+pub struct FileMap {
+    name: String,
+    contents: String,
+    next_id: Rc<AtomicUsize>,
+    items: RefCell<HashMap<Span, Range<usize>>>
+}
+
+impl FileMap {
+    // Return file name
+    pub fn filename(&self) -> &str {
+        &self.name
+    }
+
+    // Get contents
+    pub fn contents(&self) -> &str {
+        &self.contents
+    }
+
+    pub fn lookup(&self, span: Span) -> Option<&str> {
+        let range = match self.range_of(span) {
+            Some(r) => r,
+            None => return None,
+        };
+
+        match self.contents.get(range.clone()) {
+            Some(substr) => Some(substr),
+            None => panic!("FileMap thinks it contains {:?}, \
+                but the range ({:?}) doesn't point to anything valid!", span, range),
+        }
+    }
+
+    pub fn range_of(&self, span: Span) -> Option<Range<usize>> {
+        self.items.borrow().get(&span).cloned()
     }
 }

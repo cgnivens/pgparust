@@ -181,3 +181,15 @@ impl FileMap {
         registered
     }
 }
+
+
+// TODO: Need to write tests here
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_sanity() {
+        assert!(true);
+    }
+}

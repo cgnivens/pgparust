@@ -364,7 +364,7 @@ pub fn tokenize(src: &str) -> Result<Vec<(TokenKind, usize, usize)>, LexerError>
     Ok(tokens)
 }
 
-
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Token {
     pub span: Span,
     pub kind: TokenKind,

@@ -352,6 +352,28 @@ pub fn tokenize(src: &str) -> Result<Vec<(TokenKind, usize, usize)>, LexerError>
     Ok(tokens)
 }
 
+
+pub struct Token {
+    pub span: Span,
+    pub kind: TokenKind,
+}
+
+
+impl Token {
+    pub fn new<K: Into<TokenKind>>(span: Span, kind: K) -> Token {
+        let kind = kind.into();
+        Token { span, kind }
+    }
+}
+
+
+impl<T> From<T> for Token
+where T: Into<TokenKind> {
+    fn from(other: T) -> Token {
+        Token::new(Span::dummy(), other)
+    }
+}
+
 enum QueryType {
     CREATE,
     SELECT,
@@ -388,11 +410,11 @@ struct Query {
 #[test]
 fn tokenize_basic_select() {
     let src = "SELECT * FROM mytable";
-    let should_be: Vec<(Token, usize, usize)> = vec![
-        (Token::from_str("SELECT").unwrap(), 0, 6),
-        (Token::Asterisk, 7, 8),
-        (Token::from_str("FROM").unwrap(), 9, 13),
-        (Token::from_str("mytable").unwrap(), 14, 21),
+    let should_be: Vec<(TokenKind, usize, usize)> = vec![
+        (TokenKind::from_str("SELECT").unwrap(), 0, 6),
+        (TokenKind::Asterisk, 7, 8),
+        (TokenKind::from_str("FROM").unwrap(), 9, 13),
+        (TokenKind::from_str("mytable").unwrap(), 14, 21),
     ];
     let tokens = tokenize(src).unwrap();
 
@@ -418,14 +440,14 @@ fn broken_snippet() {
 #[test]
 fn test_builtins() {
     let src = "SELECT COUNT(1) FROM mytable";
-    let should_be: Vec<(Token, usize, usize)> = vec![
-        (Token::Reserved("SELECT".to_string()), 0, 6),
-        (Token::Function("COUNT".to_string()), 7, 12),
-        (Token::OpenParen, 12, 13),
-        (Token::from(1), 13, 14),
-        (Token::CloseParen, 14, 15),
-        (Token::Reserved("FROM".to_string()), 16, 20),
-        (Token::from_str("mytable").unwrap(), 21, 28)
+    let should_be: Vec<(TokenKind, usize, usize)> = vec![
+        (TokenKind::Reserved("SELECT".to_string()), 0, 6),
+        (TokenKind::Function("COUNT".to_string()), 7, 12),
+        (TokenKind::OpenParen, 12, 13),
+        (TokenKind::from(1), 13, 14),
+        (TokenKind::CloseParen, 14, 15),
+        (TokenKind::Reserved("FROM".to_string()), 16, 20),
+        (TokenKind::from_str("mytable").unwrap(), 21, 28)
     ];
     let tokens = tokenize(src).unwrap();
     assert_eq!(tokens, should_be);
@@ -435,14 +457,37 @@ fn test_builtins() {
 #[test]
 fn test_alias() {
     let src = "SELECT t.hello FROM mytable t";
-    let should_be: Vec<(Token, usize, usize)> = vec![
-        (Token::Reserved("SELECT".to_string()), 0, 6),
-        (Token::from_str("t").unwrap(), 7, 8),
-        (Token::Dot, 8, 9),
-        (Token::from_str("hello").unwrap(), 9, 14),
-        (Token::Reserved("FROM".to_string()), 15, 19),
-        (Token::from_str("mytable").unwrap(), 20, 27),
-        (Token::from_str("t").unwrap(), 28, 29),
+    let should_be: Vec<(TokenKind, usize, usize)> = vec![
+        (TokenKind::Reserved("SELECT".to_string()), 0, 6),
+        (TokenKind::from_str("t").unwrap(), 7, 8),
+        (TokenKind::Dot, 8, 9),
+        (TokenKind::from_str("hello").unwrap(), 9, 14),
+        (TokenKind::Reserved("FROM".to_string()), 15, 19),
+        (TokenKind::from_str("mytable").unwrap(), 20, 27),
+        (TokenKind::from_str("t").unwrap(), 28, 29),
+    ];
+    let tokens = tokenize(src).unwrap();
+    assert_eq!(tokens, should_be);
+}
+
+
+#[cfg(test)]
+#[test]
+fn test_left_join() {
+    let src = "LEFT JOIN abc d ON d.id = t.id";
+    let should_be: Vec<(TokenKind, usize, usize)> = vec![
+        (TokenKind::from_str("LEFT").unwrap(), 0, 4),
+        (TokenKind::from_str("JOIN").unwrap(), 5, 9),
+        (TokenKind::from_str("abc").unwrap(), 10, 13),
+        (TokenKind::from_str("d").unwrap(), 14, 15),
+        (TokenKind::Reserved("ON".to_string()), 16, 18),
+        (TokenKind::from_str("d").unwrap(), 19, 20),
+        (TokenKind::Dot, 20, 21),
+        (TokenKind::from_str("id").unwrap(), 21, 23),
+        (TokenKind::Equals, 24, 25),
+        (TokenKind::from_str("t").unwrap(), 26, 27),
+        (TokenKind::Dot, 27, 28),
+        (TokenKind::from_str("id").unwrap(), 28, 30),
     ];
     let tokens = tokenize(src).unwrap();
     assert_eq!(tokens, should_be);

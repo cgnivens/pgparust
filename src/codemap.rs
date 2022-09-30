@@ -167,4 +167,17 @@ impl FileMap {
 
         self.insert_span(start, end)
     }
+
+    // Register tokens into a stream
+    pub fn register_tokens(&self, tokens: Vec<(TokenKind, usize, usize)>) -> Vec<Token> {
+        let mut registered = Vec::new();
+
+        for (kind, start, end) in tokens {
+            let span = self.insert_span(start, end);
+            let token = Token::new(span, kind);
+            registered.push(token);
+        }
+
+        registered
+    }
 }

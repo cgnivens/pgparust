@@ -116,7 +116,7 @@ impl From<String> for TokenKind {
     }
 }
 
-impl std::str::FromStr for TokenKind {
+impl FromStr for TokenKind {
     // Wrap in the checks for functions/reserved keywords
     // here to make it easier
     type Err = io::Error;
@@ -140,6 +140,18 @@ impl From<usize> for TokenKind {
 impl From<f64> for TokenKind {
     fn from(other: f64) -> TokenKind {
         TokenKind::Decimal(other)
+    }
+}
+
+impl From<&str> for TokenKind {
+    fn from(other: &str) -> TokenKind {
+        if reserved::is_function(other){
+            TokenKind::Function(other.to_string())
+        } else if reserved::is_reserved(other) {
+            TokenKind::Reserved(other.to_string())
+        } else {
+            TokenKind::Identifier(other.to_string())
+        }
     }
 }
 

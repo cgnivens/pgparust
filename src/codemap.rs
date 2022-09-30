@@ -118,4 +118,53 @@ impl FileMap {
     pub fn range_of(&self, span: Span) -> Option<Range<usize>> {
         self.items.borrow().get(&span).cloned()
     }
+
+    pub fn insert_span(&self, start: usize, end: usize) -> Span {
+        debug_assert!(self.contents.is_char_boundary(start),
+            "Start doesn't lie on a char boundary");
+        debug_assert!(self.contents.is_char_boundary(end),
+            "End doesn't lie on a char boundary");
+        debug_assert!(start < self.contents.len(),
+            "Start lies outside the content string");
+        debug_assert!(end <= self.contents.len(),
+            "End lies outside the content string");
+
+        let range = start..end;
+
+        // Need to reverse-lookup the range to see if we are already
+        // tracking this span
+        if let Some(existing) = self.reverse_lookup(&range) {
+            return existing;
+        }
+
+        // otherwise, increment the memory id of the touched region
+        let span_id = self.next_id.fetch_add(1, Ordering::Relaxed);
+        let span = Span(span_id);
+
+        self.items.borrow_mut().insert(span, range);
+        span
+    }
+
+    // Iterate through all of the spans within a file
+    // to find one that exists. Each Range should only be in
+    // a file once
+    pub fn reverse_lookup(&self, needle: &Range<usize>) -> Option<Span> {
+        self.items
+            .borrow()
+            .iter()
+            .find(|&(_, range)| range == needle)
+            .map(|(span, _)| span)
+            .cloned()
+    }
+
+    // Merge overlapping spans into one (from the same FileMap)
+    pub fn merge(&self, left: Span, right: Span) -> Span {
+        let left = self.range_of(left).expect("Can only merge spans from the same FileMap");
+        let right = self.range_of(right).expect("Can only merge spans from the same FileMap");
+
+        let start = cmp::min(left.start, right.start);
+        let end = cmp::max(left.end, right.end);
+
+        self.insert_span(start, end)
+    }
 }

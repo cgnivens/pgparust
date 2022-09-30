@@ -48,4 +48,5 @@ mod tests {
     token_macro_test!(tok_expands_to_decimal, 12.34 => TokenKind::Decimal(12.34));
     token_macro_test!(tok_expands_to_identifier, "Hello" => TokenKind::Identifier("Hello".to_string()));
     token_macro_test!(tok_expands_to_reserved, "SELECT" => TokenKind::Reserved("SELECT".to_string()));
+    token_macro_test!(tok_expands_to_function, "COUNT" => TokenKind::Function("COUNT".to_string()));
 }

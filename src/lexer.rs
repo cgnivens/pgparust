@@ -5,6 +5,7 @@ use std::fmt;
 use std::num::{ParseIntError, ParseFloatError};
 use serde::{Serialize, Deserialize};
 use crate::reserved;
+use crate::codemap::{Span};
 
 #[derive(Debug)]
 pub enum LexerError {
@@ -78,7 +79,7 @@ where F: FnMut(char) -> bool
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub enum Token {
+pub enum TokenKind {
     Integer(usize),
     Decimal(f64),
     Identifier(String),
@@ -103,47 +104,47 @@ pub enum Token {
     Comma,
 }
 
-impl From<String> for Token {
-    fn from(other: String) -> Token {
+impl From<String> for TokenKind {
+    fn from(other: String) -> TokenKind {
         if reserved::is_function(&other){
-            Token::Function(other)
+            TokenKind::Function(other)
         } else if reserved::is_reserved(&other) {
-            Token::Reserved(other)
+            TokenKind::Reserved(other)
         } else {
-            Token::Identifier(other)
+            TokenKind::Identifier(other)
         }
     }
 }
 
-impl std::str::FromStr for Token {
+impl std::str::FromStr for TokenKind {
     // Wrap in the checks for functions/reserved keywords
     // here to make it easier
     type Err = io::Error;
-    fn from_str(other: &str) -> io::Result<Token> {
+    fn from_str(other: &str) -> io::Result<TokenKind> {
         if reserved::is_function(other){
-            Ok(Token::Function(other.to_string()))
+            Ok(TokenKind::Function(other.to_string()))
         } else if reserved::is_reserved(other) {
-            Ok(Token::Reserved(other.to_string()))
+            Ok(TokenKind::Reserved(other.to_string()))
         } else {
-            Ok(Token::Identifier(other.to_string()))
+            Ok(TokenKind::Identifier(other.to_string()))
         }
     }
 }
 
-impl From<usize> for Token {
-    fn from(other: usize) -> Token {
-        Token::Integer(other)
+impl From<usize> for TokenKind {
+    fn from(other: usize) -> TokenKind {
+        TokenKind::Integer(other)
     }
 }
 
-impl From<f64> for Token {
-    fn from(other: f64) -> Token {
-        Token::Decimal(other)
+impl From<f64> for TokenKind {
+    fn from(other: f64) -> TokenKind {
+        TokenKind::Decimal(other)
     }
 }
 
 
-fn tokenize_ident(data: &str) -> io::Result<(Token, usize)> {
+fn tokenize_ident(data: &str) -> io::Result<(TokenKind, usize)> {
     // Cannot start identifiers with a number
     match data.chars().next() {
         Some(ch) if ch.is_digit(10) => return Err(io::Error::new(io::ErrorKind::Other, format!("Identifiers can't start with a number"))),
@@ -154,13 +155,13 @@ fn tokenize_ident(data: &str) -> io::Result<(Token, usize)> {
     let (got, bytes_read) = take_while(data, |ch| (ch == '_') || (ch.is_alphanumeric()))?;
 
     // match keywords using from_str implementation
-    let tok = Token::from_str(got)?;
+    let tok = TokenKind::from_str(got)?;
 
     Ok((tok, bytes_read))
 }
 
 
-fn tokenize_number(data: &str) -> Result<(Token, usize), LexerError> {
+fn tokenize_number(data: &str) -> Result<(TokenKind, usize), LexerError> {
     let mut seen_dot = false;
 
     let (decimal, bytes_read) = take_while(data, |c| {
@@ -180,14 +181,14 @@ fn tokenize_number(data: &str) -> Result<(Token, usize), LexerError> {
 
     if seen_dot {
         let n: f64 = decimal.parse()?;
-        Ok((Token::Decimal(n), bytes_read))
+        Ok((TokenKind::Decimal(n), bytes_read))
     } else {
         let n: usize = decimal.parse()?;
-        Ok((Token::Integer(n), bytes_read))
+        Ok((TokenKind::Integer(n), bytes_read))
     }
 }
 
-fn tokenize_quote_string(data: &str) -> Result<(Token, usize), LexerError> {
+fn tokenize_quote_string(data: &str) -> Result<(TokenKind, usize), LexerError> {
     let mut seen_esc = false;
 
     let (s, bytes_read) = take_while(data, |c| {
@@ -211,7 +212,7 @@ fn tokenize_quote_string(data: &str) -> Result<(Token, usize), LexerError> {
         }
     })?;
 
-    Ok((Token::QuotedString(s.to_string()), bytes_read))
+    Ok((TokenKind::QuotedString(s.to_string()), bytes_read))
 }
 
 fn skip_whitespace(data: &str) -> usize {
@@ -261,26 +262,26 @@ fn skip(src: &str) -> usize {
     }
 }
 
-pub fn tokenize_single_token(data: &str) -> Result<(Token, usize), LexerError> {
+pub fn tokenize_single_token(data: &str) -> Result<(TokenKind, usize), LexerError> {
     let next = match data.chars().next() {
         Some(c) => c,
         None => return Err(LexerError::EOFError("Hit end of file".to_string())),
     };
 
     let (tok, length) = match next {
-        '.' => (Token::Dot, 1),
-        '=' => (Token::Equals, 1),
-        '+' => (Token::Plus, 1),
-        '-' => (Token::Minus, 1),
-        '*' => (Token::Asterisk, 1),
-        '/' => (Token::Slash, 1),
-        '@' => (Token::At, 1),
-        '^' => (Token::Carat, 1),
-        '(' => (Token::OpenParen, 1),
-        ')' => (Token::CloseParen, 1),
-        '[' => (Token::OpenSquare, 1),
-        ']' => (Token::CloseSquare, 1),
-        ',' => (Token::Comma, 1),
+        '.' => (TokenKind::Dot, 1),
+        '=' => (TokenKind::Equals, 1),
+        '+' => (TokenKind::Plus, 1),
+        '-' => (TokenKind::Minus, 1),
+        '*' => (TokenKind::Asterisk, 1),
+        '/' => (TokenKind::Slash, 1),
+        '@' => (TokenKind::At, 1),
+        '^' => (TokenKind::Carat, 1),
+        '(' => (TokenKind::OpenParen, 1),
+        ')' => (TokenKind::CloseParen, 1),
+        '[' => (TokenKind::OpenSquare, 1),
+        ']' => (TokenKind::CloseSquare, 1),
+        ',' => (TokenKind::Comma, 1),
         '0' ... '9' => tokenize_number(data)?,
         '"' => tokenize_quote_string(data)?,
         c @ '_' | c if c.is_alphabetic() => tokenize_ident(data)?,
@@ -303,7 +304,7 @@ impl<'a> Tokenizer<'a> {
         }
     }
 
-    fn next_token(&mut self) -> Result<Option<(Token, usize, usize)>, LexerError> {
+    fn next_token(&mut self) -> Result<Option<(TokenKind, usize, usize)>, LexerError> {
         self.skip_whitespace();
 
         if self.remaining_text.is_empty() {
@@ -326,7 +327,7 @@ impl<'a> Tokenizer<'a> {
         self.chomp(skipped);
     }
 
-    fn _next_token(&mut self) -> Result<Token, LexerError> {
+    fn _next_token(&mut self) -> Result<TokenKind, LexerError> {
         let (tok, bytes_read) = tokenize_single_token(self.remaining_text)?;
         self.chomp(bytes_read);
 
@@ -340,7 +341,7 @@ impl<'a> Tokenizer<'a> {
 }
 
 
-pub fn tokenize(src: &str) -> Result<Vec<(Token, usize, usize)>, LexerError> {
+pub fn tokenize(src: &str) -> Result<Vec<(TokenKind, usize, usize)>, LexerError> {
     let mut tokenizer = Tokenizer::new(src);
     let mut tokens = Vec::new();
 

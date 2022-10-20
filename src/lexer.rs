@@ -294,7 +294,7 @@ pub fn tokenize_single_token(data: &str) -> Result<(TokenKind, usize), LexerErro
         '[' => (TokenKind::OpenSquare, 1),
         ']' => (TokenKind::CloseSquare, 1),
         ',' => (TokenKind::Comma, 1),
-        '0' ... '9' => tokenize_number(data)?,
+        '0' ..= '9' => tokenize_number(data)?,
         '"' => tokenize_quote_string(data)?,
         c @ '_' | c if c.is_alphabetic() => tokenize_ident(data)?,
         other => return Err(LexerError::UnknownCharacter(format!("Hit unknown character {:?}", other))),
